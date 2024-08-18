@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Interactive Exploding Mesh</title>
+    <style>
+      body {
+        margin: 0;
+      }
+    </style>
+  </head>
+  <body>
+    <script type="x-shader/x-vertex" id="vertexshader">
+
+			uniform vec2 mousePosition;
+			uniform vec3 lightPosition;
+			attribute vec3 color;
+			attribute vec3 displacement;
+
+			varying vec3 vNormal;
+			varying vec3 vColor;
+			varying vec3 vLightPosition;
+
+			void main() {
+				vNormal = normal;
+				vColor = color;
+				vLightPosition = lightPosition;
+				float dist = min(0.05 - distance(position.xy, mousePosition) * 0.1, 0.0);
+				vec3 newPosition = position + normal * dist * displacement;
+				gl_Position = projectionMatrix * modelViewMatrix * vec4( newPosition, 1.0 );
+			}
+		</script>
+
+		<script type="x-shader/x-fragment" id="fragmentshader">
+
+			varying vec3 vNormal;
+			varying vec3 vColor;
+			varying vec3 vLightPosition;
+			
+			void main() {
+				const float ambient = 0.1;
+				vec3 light = vLightPosition;
+				light = normalize( light );
+				float directional = max( dot( vNormal, light ), 0.0 );
+
+				gl_FragColor = vec4( ( directional + ambient ) * vColor, 1.0 );
+			}
+		</script>
+		<script type="importmap">
+			{
+					  "imports": {
+						  "three": "https://cdn.jsdelivr.net/npm/three@0.161/build/three.module.js",
+				"jsm/": "https://cdn.jsdelivr.net/npm/three@0.161/examples/jsm/"
+			  }
+				  }
+		  </script>
+    <script type="module" src="index.js"></script>
+  </body>
+</html>
